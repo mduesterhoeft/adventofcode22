@@ -1,3 +1,4 @@
+use sscanf::sscanf;
 use std::collections::VecDeque;
 
 #[derive(Debug)]
@@ -36,12 +37,8 @@ pub fn input_generator(input: &str) -> SupplyStacks {
     let moves = lines
         .iter()
         .skip(10)
-        .map(|l| l.split_whitespace().collect::<Vec<_>>())
-        .map(|l| Move {
-            count: l.get(1).unwrap().parse::<u8>().unwrap(),
-            from: l.get(3).unwrap().parse::<u8>().unwrap(),
-            to: l.get(5).unwrap().parse::<u8>().unwrap(),
-        })
+        .map(|l| sscanf!(l, "move {u8} from {u8} to {u8}").unwrap())
+        .map(|(count, from, to)| Move { count, from, to })
         .collect::<Vec<_>>();
 
     let stacks = (0..9)
