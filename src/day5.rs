@@ -56,18 +56,13 @@ pub fn input_generator(input: &str) -> SupplyStacks {
 #[aoc(day5, part1)]
 pub fn solve_part1(input: &SupplyStacks) -> String {
     let moves = input.moves.clone();
-    let mut stacks = input
-        .stacks
-        .clone()
-        .iter()
-        .map(|v| v.to_owned())
-        .collect::<Vec<_>>();
+    let mut stacks = input.stacks.clone();
 
     for m in moves {
         (0..m.count).for_each(|_i| {
-            let taken = stacks.get_mut(usize::from(m.from - 1)).unwrap().pop_front();
+            let taken = stacks[(m.from - 1) as usize].pop_front();
             if let Some(v) = taken {
-                stacks.get_mut(usize::from(m.to - 1)).unwrap().insert(0, v)
+                stacks[(m.to - 1) as usize].push_front(v)
             }
         })
     }
@@ -88,12 +83,12 @@ pub fn solve_part2(input: &SupplyStacks) -> String {
     for m in moves {
         let mut moved: VecDeque<char> = VecDeque::new();
         (0..m.count).for_each(|_i| {
-            let taken = stacks.get_mut(usize::from(m.from - 1)).unwrap().pop_front();
+            let taken = stacks[(m.from - 1) as usize].pop_front();
             if let Some(t) = taken {
                 moved.push_front(t);
             }
         });
-        let target = stacks.get_mut(usize::from(m.to - 1)).unwrap();
+        let target = &mut stacks[(m.to - 1) as usize];
         moved.iter().for_each(|m| target.push_front(*m));
     }
 
