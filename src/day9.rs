@@ -156,7 +156,7 @@ fn move_tail(head_pos: &Pos, tail_pos: &Pos) -> Pos {
         let y = match i32::abs(distance_y) {
             2 => tail_pos.y + (distance_y / 2),
             1 => tail_pos.y + (distance_y * 1),
-            0 => tail_pos.y ,
+            0 => tail_pos.y,
             _ => panic!("invalid y"),
         };
         return Pos { x, y };
