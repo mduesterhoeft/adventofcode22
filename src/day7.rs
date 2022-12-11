@@ -1,63 +1,87 @@
+use camino::*;
+use id_tree::*;
 use std::collections::HashMap;
+pub struct Dir {
+    path: Utf8PathBuf,
+    size: usize,
+}
 
 #[aoc_generator(day7)]
-pub fn input_generator(input: &str) -> HashMap<String, u32> {
-    let mut dirs: HashMap<String, u32> = HashMap::new();
-    let mut current_dir: Vec<&str> = Vec::new();
-    let mut iter = input.lines().into_iter();
+pub fn input_generator(input: &str) -> Tree<Dir> {
+    use id_tree::InsertBehavior::*;
+    let mut tree: Tree<Dir> = TreeBuilder::new().build();
+
+    let mut root_path = Utf8PathBuf::new();
+    root_path.push("/");
+
+    let mut current_node: NodeId = tree
+        .insert(
+            Node::new(Dir {
+                path: root_path,
+                size: 0,
+            }),
+            AsRoot,
+        )
+        .unwrap();
+
+    let mut iter = input.lines();
+    iter.next().unwrap();
 
     while let Some(line) = iter.next() {
         if !line.starts_with("$") {
             if !line.starts_with("dir") {
-                let size: u32 = line
-                    .split_whitespace()
-                    .collect::<Vec<_>>()
-                    .first()
-                    .unwrap()
-                    .to_string()
-                    .parse()
-                    .unwrap();
+                let split = line.split_whitespace().collect::<Vec<_>>();
+                let size: usize = split.first().unwrap().to_string().parse().unwrap();
 
-                dirs.entry(dir_name(&current_dir))
-                    .and_modify(|e| *e += size)
-                    .or_insert(size);
+                current_node = tree
+                    .insert(
+                        Node::new(Dir {
+                            path: split.last().unwrap().into(),
+                            size,
+                        }),
+                        UnderNode(&current_node),
+                    )
+                    .unwrap();
             }
         };
 
         if line.starts_with("$ cd ..") {
-            current_dir = current_dir.split_last().unwrap().1.to_vec();
+            current_node = tree.get(&current_node).unwrap().parent().unwrap().clone();
         } else if line.starts_with("$ ls") {
         } else if line.starts_with("$ cd") {
             let dir = line.split_whitespace().last().unwrap();
+            let node = tree.get(&current_node).unwrap();
+            let mut new_path = node.data().path.clone();
+            new_path.push(dir);
 
-            current_dir.push(if dir == "/" { "root" } else { dir });
-            dirs.entry(dir_name(&current_dir)).or_insert(0);
+            current_node = tree
+                .insert(
+                    Node::new(Dir {
+                        path: new_path,
+                        size: 0,
+                    }),
+                    UnderNode(&current_node),
+                )
+                .unwrap()
         };
     }
-    return dirs;
+    tree
 }
 
 #[aoc(day7, part1)]
-pub fn solve_part1(dirs: &HashMap<String, u32>) -> u32 {
-    count_big_dirs(&dirs)
+pub fn solve_part1(dirs: &Tree<Dir>) -> u32 {
+    1
 }
 
 #[aoc(day7, part2)]
-pub fn solve_part2(dirs: &HashMap<String, u32>) -> u32 {
-    dirs.into_iter().for_each(|d| println!("dir {:?}", d));
-    let mut sizes = dirs
-        .iter()
-        .map(|(k, _)| (k, sum_size(sub_dirs(k, dirs), dirs)))
-        .collect::<Vec<_>>();
-    sizes.sort_by(|a, b| a.1.cmp(&b.1));
-
-    for s in sizes {
-        println!("dir {:?} has size {:?}", s.0, s.1);
-        if s.1 >= 8381165 {
-            return s.1;
-        }
-    }
-    0
+pub fn solve_part2(tree: &Tree<Dir>) -> usize {
+    const TOTAL_SPACE: usize = 70000000;
+    let total_size = tree
+        .traverse_pre_order(tree.root_node_id().unwrap())
+        .unwrap()
+        .fold(0, |a, i| a + i.data().size);
+    let needed_space = TOTAL_SPACE - total_size;
+    total_size
 }
 
 fn dir_name(dirs: &Vec<&str>) -> String {
