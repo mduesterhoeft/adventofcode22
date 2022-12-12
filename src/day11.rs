@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 use sscanf::sscanf;
 
@@ -59,12 +59,7 @@ pub fn input_generator(input: &str) -> Vec<Monkey> {
     monkeys
 }
 
-fn worry_level(
-        item: usize,
-    operation: &Operation,
-    operation_value: &String,
-    divide: bool,
-        ) -> usize {
+fn worry_level(item: usize, operation: &Operation, operation_value: &String, part1: bool) -> usize {
     let value: usize = if operation_value == "old" {
         item
     } else {
@@ -75,7 +70,7 @@ fn worry_level(
         Operation::MULTIPLY => item * value,
     };
 
-    if divide {
+    if part1 {
         worry_level_handling / 3
     } else {
         worry_level_handling
@@ -93,7 +88,7 @@ fn throw_item(
     let remove_from_idx = from_items
         .iter()
         .enumerate()
-        .filter(|(i, v)| **v == item)
+        .filter(|(_, v)| **v == item)
         .map(|(i, _)| i)
         .next()
         .unwrap();
@@ -150,6 +145,11 @@ pub fn solve_part2(input: &[Monkey]) -> usize {
         monkey_items.insert(m.id, m.items.clone());
     });
     let mut monkey_count: HashMap<usize, usize> = HashMap::new();
+
+    let divisible_by_product = monkeys
+        .iter()
+        .map(|m| m.test_divisible_by)
+        .product::<usize>();
     for round in 1..=10000 {
         dbg!(round);
         for monkey in monkeys {
@@ -157,7 +157,8 @@ pub fn solve_part2(input: &[Monkey]) -> usize {
             let items = monkey_items_copy.get(&monkey.id).unwrap();
             for item in items {
                 let worry_level =
-                    worry_level(*item, &monkey.operation, &monkey.operation_value, false);
+                    worry_level(*item, &monkey.operation, &monkey.operation_value, false)
+                        % divisible_by_product;
                 throw_item(
                     &mut monkey_items,
                     *item,

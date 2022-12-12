@@ -1,6 +1,5 @@
 use camino::*;
 use id_tree::*;
-use std::collections::HashMap;
 pub struct Dir {
     path: Utf8PathBuf,
     size: usize,
@@ -69,7 +68,7 @@ pub fn input_generator(input: &str) -> Tree<Dir> {
 }
 
 #[aoc(day7, part1)]
-pub fn solve_part1(dirs: &Tree<Dir>) -> u32 {
+pub fn solve_part1(_dirs: &Tree<Dir>) -> u32 {
     1
 }
 
@@ -81,41 +80,9 @@ pub fn solve_part2(tree: &Tree<Dir>) -> usize {
         .unwrap()
         .fold(0, |a, i| a + i.data().size);
     let needed_space = TOTAL_SPACE - total_size;
-    total_size
+    total_size - needed_space
 }
 
-fn dir_name(dirs: &Vec<&str>) -> String {
-    if dirs.len() == 1 {
-        "root".to_string()
-    } else {
-        dirs.join("-")
-    }
-}
-
-fn count_big_dirs(dirs: &HashMap<String, u32>) -> u32 {
-    dirs.iter()
-        .map(|(k, _)| sum_size(sub_dirs(k, dirs), dirs))
-        .filter(|v| *v <= 100000)
-        .sum()
-}
-
-fn sum_size(dirs: Vec<String>, all_dirs: &HashMap<String, u32>) -> u32 {
-    all_dirs
-        .into_iter()
-        .filter(|(k, _)| dirs.contains(k))
-        .map(|(_, v)| *v)
-        .sum()
-}
-fn sub_dirs(dir: &String, dirs: &HashMap<String, u32>) -> Vec<String> {
-    println!("all dirs {:?} ", dirs);
-    let s = dirs
-        .into_iter()
-        .filter(|(k, _)| k.starts_with(dir))
-        .map(|(k, _)| k.clone())
-        .collect();
-    println!("subdir of {:?} are {:?}", dir, s);
-    s
-}
 #[cfg(test)]
 mod tests {
     use super::*;
