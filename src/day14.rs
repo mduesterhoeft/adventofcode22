@@ -49,7 +49,7 @@ fn line_to_points(l: &str) -> Vec<Point> {
             let b = &w[1];
             if a.x != b.x {
                 let diffx = b.x - a.x;
-                let range = min(diffx, 0)..max(1, diffx +1);
+                let range = min(diffx, 0)..max(1, diffx + 1);
                 range
                     .map(|p| Point { x: a.x + p, y: a.y })
                     .collect::<Vec<_>>()
@@ -94,11 +94,9 @@ pub fn solve_part1(input: &HashSet<Point>) -> u32 {
         let mut current_unit = source.clone();
         let mut next_move_possible = true;
         while next_move_possible {
-            if let Some(p) = next_position(&points_concrete, &current_unit) {
-                println!("move {:?}", p);
-                current_unit = p;
-            } else {
-                next_move_possible = false;
+            match next_position(&points_concrete, &current_unit) {
+                Some(p) => current_unit = p,
+                None => next_move_possible = false,
             }
             if current_unit.y > max_y {
                 return count_units;
@@ -114,7 +112,7 @@ pub fn solve_part1(input: &HashSet<Point>) -> u32 {
 fn horizontal_line_at_bottom(input: &HashSet<Point>) -> HashSet<Point> {
     let mut points = input.clone();
     let max_y = input.iter().map(|p| p.y).max().unwrap();
-    let line_y = max_y +2;
+    let line_y = max_y + 2;
     for i in 0..1000 {
         points.insert(Point { x: i, y: line_y });
     }
@@ -131,11 +129,9 @@ pub fn solve_part2(input: &HashSet<Point>) -> u32 {
         let mut current_unit = source.clone();
         let mut next_move_possible = true;
         while next_move_possible {
-            if let Some(p) = next_position(&points_concrete, &current_unit) {
-                //println!("move {:?}", p);
-                current_unit = p;
-            } else {
-                next_move_possible = false;
+            match next_position(&points_concrete, &current_unit) {
+                Some(p) => current_unit = p,
+                None => next_move_possible = false,
             }
             if current_unit.y == 0 {
                 return count_units;
