@@ -39,6 +39,8 @@ impl From<&str> for Point {
     }
 }
 
+const SOURCE: Point = Point { x: 500, y: 0 };
+
 fn line_to_points(l: &str) -> Vec<Point> {
     l.split(" -> ")
         .map(|p| Point::from(p))
@@ -85,13 +87,11 @@ fn next_position(points_concrete: &HashSet<Point>, point: &Point) -> Option<Poin
 #[aoc(day14, part1)]
 pub fn solve_part1(input: &HashSet<Point>) -> u32 {
     let mut points_concrete = input.clone();
-    let source = Point { x: 500, y: 0 };
     let max_y = input.iter().map(|p| p.y).max().unwrap();
-    dbg!(max_y);
     let mut count_units = 0;
 
     loop {
-        let mut current_unit = source.clone();
+        let mut current_unit = SOURCE.clone();
         let mut next_move_possible = true;
         while next_move_possible {
             match next_position(&points_concrete, &current_unit) {
@@ -102,31 +102,28 @@ pub fn solve_part1(input: &HashSet<Point>) -> u32 {
                 return count_units;
             }
         }
-
-        dbg!(&current_unit);
         points_concrete.insert(current_unit.clone());
         count_units += 1;
     }
 }
 
 fn horizontal_line_at_bottom(input: &HashSet<Point>) -> HashSet<Point> {
-    let mut points = input.clone();
     let max_y = input.iter().map(|p| p.y).max().unwrap();
-    let line_y = max_y + 2;
-    for i in 0..1000 {
-        points.insert(Point { x: i, y: line_y });
-    }
-    points
+    (0..1000)
+        .map(|i| Point { x: i, y: max_y + 2 })
+        .collect::<HashSet<_>>()
 }
+
 #[aoc(day14, part2)]
 pub fn solve_part2(input: &HashSet<Point>) -> u32 {
-    let mut points_concrete = horizontal_line_at_bottom(&input);
-    let source = Point { x: 500, y: 0 };
-
+    let mut points_concrete = input
+        .union(&horizontal_line_at_bottom(&input))
+        .map(|p| p.clone())
+        .collect::<HashSet<_>>();
     let mut count_units = 1;
 
     loop {
-        let mut current_unit = source.clone();
+        let mut current_unit = SOURCE.clone();
         let mut next_move_possible = true;
         while next_move_possible {
             match next_position(&points_concrete, &current_unit) {
