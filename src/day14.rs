@@ -1,5 +1,5 @@
 use std::cmp::{max, min};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 #[derive(Hash, Clone, PartialEq, Eq, Debug)]
 pub struct Point {
     x: i32,

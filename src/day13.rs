@@ -1,4 +1,4 @@
-use eval::{eval, Value};
+use eval::{eval};
 use std::cmp::Ordering;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd)]
